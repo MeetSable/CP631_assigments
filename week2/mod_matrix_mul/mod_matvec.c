@@ -33,12 +33,12 @@ int Read_input(char* input_path, int* mg, int* ng, float** local_a, float** loca
 	*local_x = (float*)malloc(n*sizeof(float));
 	memset(*local_a, 0, m*n*sizeof(float));
 	memset(*local_x, 0, n*sizeof(float));
-
-	for(int i = 0 ; i < m ; i++)
+	int i, j;
+	for(i = 0 ; i < m ; i++)
 	{
 		fgets(line, MAX_LINE_LENGTH, fptr);
 		token = strtok_r(line, " ", &rest);
-		for(int j = 0 ; j < n ; j++)
+		for(j = 0 ; j < n ; j++)
 		{
 			(*local_a)[i*n + j] = atof(token);
 			token = strtok_r(NULL, " ", &rest);
@@ -46,7 +46,7 @@ int Read_input(char* input_path, int* mg, int* ng, float** local_a, float** loca
 	}
 	fgets(line, MAX_LINE_LENGTH, fptr);
 	token = strtok_r(line, " ", &rest);
-	for(int i = 0 ; i < n ; i++)
+	for(i = 0 ; i < n ; i++)
 	{
 		(*local_x)[i] = atof(token);
 		token = strtok_r(NULL, " ", &rest);
@@ -102,10 +102,11 @@ void Parallel_matrix_vector_prod(float* local_a, float* local_x, float* global_x
 
 void Print_matrix(char* title, float* mat, int m, int n)
 {
+	int i,j;
 	printf("%s\n", title);
-	for(int i = 0 ; i < m ; i++)
+	for(i = 0 ; i < m ; i++)
 	{
-		for(int j = 0 ; j < n ; j++)
+		for(j = 0 ; j < n ; j++)
 		{
 			printf("%4.1f ", mat[i*n + j]);
 		}
@@ -114,8 +115,9 @@ void Print_matrix(char* title, float* mat, int m, int n)
 }
 void Print_vector(char* title, float* vec, int n)
 {
+	int i;
 	printf("%s\n", title);
-	for(int i = 0 ; i < n ; i++)
+	for(i = 0 ; i < n ; i++)
 		printf("%4.1f ", vec[i]);
 	printf("\n");
 }
