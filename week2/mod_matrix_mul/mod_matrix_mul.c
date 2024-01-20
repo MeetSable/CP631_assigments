@@ -15,13 +15,25 @@ int main(int argc, char** argv)
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &p);
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+	if(argc < 2)
+	{
+		MPI_Finalize();
+		printf("Provide input name");
+		return -1;
+	}
 	int stat = 1;
+
 	if(my_rank == 0)
 	{
-		char *input_path = (char*)"input";
+		char *input_path = argv[1];
 		stat = Read_input(input_path, &m, &n, &local_a, &local_x);
 		Print_matrix((char*)"Read matrix:", local_a, m, n);
 		Print_vector((char*)"Read vector:", local_x, n);
+		if(m%p != 0 || n%p != 0)
+		{
+			perror("m and n both should be divisible by p\n");
+			stat = 0;
+		}
 	}
 	MPI_Bcast(&stat, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	if(stat == 0)
@@ -34,6 +46,11 @@ int main(int argc, char** argv)
 		return -1;
 	}
 	//
+	double start_time, end_time;
+	if(my_rank == 0)
+	{
+		start_time = MPI_Wtime();
+	}
 	MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	local_m = m/p;
@@ -45,9 +62,13 @@ int main(int argc, char** argv)
 	memset(local_y, 0, n*sizeof(float));
 	Parallel_matrix_vector_prod(local_a, local_x, global_x, local_y, m, n, local_m, local_n);
 	if(my_rank == 0)
-		Print_vector((char*)"Calculated vector:", local_y, n);
+	{
+		end_time = MPI_Wtime();
+		double time_taken = (end_time - start_time)*1000000000;
+		printf("\n\nTime Taken %.1f ns\n", time_taken);
+		Print_vector((char*)"\nCalculated vector:", local_y, n);
+	}
 	// 
-
 	free(local_a);
 	free(local_x);
 	free(local_y);
